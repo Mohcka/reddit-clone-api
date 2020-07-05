@@ -84,6 +84,10 @@ namespace reddit_clone_api
         };
       });
 
+      // * DI services
+      services.AddScoped<IUserService, UserService>();
+      services.AddScoped<IPostService, PostService>();
+
 
       services.AddControllers();
 
