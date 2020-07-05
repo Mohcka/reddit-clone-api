@@ -117,6 +117,7 @@ namespace reddit_clone_api
       // ! Must be placed after Routing and before Authorization
       app.UseCors();
 
+      app.UseAuthentication();
       app.UseAuthorization();
 
       app.UseEndpoints(endpoints =>
