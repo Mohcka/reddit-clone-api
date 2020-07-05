@@ -6,7 +6,22 @@ using System.Linq;
 
 namespace reddit_clone_api.Services
 {
-  public class PostService
+  public interface IPostService {
+    /// <summary>
+    /// Get a list of posts
+    /// </summary>
+    /// <returns></returns>
+    List<Post> Get();
+    Post Get(string id);
+
+    Task<IEnumerable<Post>> GetPostsByUserId(string id);
+    Post Create(Post post);
+    void Update(string id, Post postin);
+    void Remove(string id);
+
+  }
+
+  public class PostService : IPostService
   {
     private readonly IMongoCollection<Post> _posts;
 
