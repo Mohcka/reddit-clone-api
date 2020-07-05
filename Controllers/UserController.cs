@@ -15,7 +15,7 @@ namespace reddit_clone_api.Controllers
   [Authorize]
   [ApiController]
   [Route("api/[controller]")]
-  [EnableCors("Public")]
+  [EnableCors("public")]
   public class UsersController : ControllerBase
   {
     private IUserService _userService;
