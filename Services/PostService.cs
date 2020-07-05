@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using reddit_clone_api.Models;
 using MongoDB.Driver;
 using System.Collections.Generic;
@@ -22,6 +23,11 @@ namespace reddit_clone_api.Services
 
     public Post Get(string id) =>
         _posts.Find<Post>(post => post.Id == id).FirstOrDefault();
+
+    public async Task<IEnumerable<Post>> GetPostsByUserId(string id)
+    {
+      return await _posts.Find<Post>(p => p.UserId == id).ToListAsync();
+    }
 
     public Post Create(Post post)
     {
