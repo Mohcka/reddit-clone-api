@@ -46,6 +46,15 @@ namespace reddit_clone_api
         });
       });
 
+      // * Strongly typed settings configuration
+      services.Configure<AppSettings>(
+        Configuration.GetSection(nameof(AppSettings))
+      );
+
+      services.AddSingleton<IAppSettings>(
+        sp => sp.GetRequiredService<IOptions<AppSettings>>().Value
+      );
+
       services.Configure<RedditCloneDatabaseSettings>(
         Configuration.GetSection(nameof(RedditCloneDatabaseSettings))
       );
@@ -54,7 +63,26 @@ namespace reddit_clone_api
         sp => sp.GetRequiredService<IOptions<RedditCloneDatabaseSettings>>().Value
       );
 
-      services.AddSingleton<PostService>();
+      // * Jwt Configuration
+      var appSettings = Configuration.GetSection(nameof(AppSettings)).Get<AppSettings>();
+      var key = Encoding.ASCII.GetBytes(appSettings.Secret);
+      services.AddAuthentication(auth =>
+      {
+        auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+      })
+      .AddJwtBearer(jwt =>
+      {
+        jwt.RequireHttpsMetadata = false;
+        jwt.SaveToken = true;
+        jwt.TokenValidationParameters = new TokenValidationParameters
+        {
+          ValidateIssuerSigningKey = true,
+          IssuerSigningKey = new SymmetricSecurityKey(key),
+          ValidateIssuer = false,
+          ValidateAudience = false
+        };
+      });
 
 
       services.AddControllers();
