@@ -1,3 +1,5 @@
+using System.Reflection;
+using System.Text;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,9 +14,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 using reddit_clone_api.Models;
 using reddit_clone_api.Services;
+using reddit_clone_api.Helpers;
 
 
 
