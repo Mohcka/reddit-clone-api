@@ -54,7 +54,7 @@ namespace reddit_clone_api.Services
     /// </summary>
     /// <param name="model"></param>
     /// <returns></returns>
-    public AuthenticateResponseDTO Authenticate(AuthenticateRequestDTO model)
+    public AuthenticateResponseDTO Authenticate(AuthenticateRequestDTO model) // TODO: Why did I put this DTO here
     {
       System.Console.WriteLine(_users.Find(x => true).ToList());
 
