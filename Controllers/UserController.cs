@@ -46,6 +46,28 @@ namespace reddit_clone_api.Controllers
       return Ok(resp);
     }
 
+    /// <summary>
+    /// Sends data to an authorized client their public credentials via a UserInfoResponseDTO
+    /// </summary>
+    /// <value></value>
+    [HttpGet]
+    public async Task<IActionResult> GetSignedInUser()
+    {
+      var userId = User.FindFirst(ClaimTypes.Name)?.Value;
+      var user = await _userService.GetUser(userId);
+
+      if (user == null)
+      {
+        return BadRequest(new { message = "An error had occured on the server" });
+      }
+
+      return Ok(new UserInfoResponseDTO
+      {
+        UserId = user.Id,
+        UserName = user.UserName
+      });
+    }
+
     [HttpGet("{id:length(24)}/posts")]
     public async Task<IActionResult> GetUserWithPosts(string id)
     {
