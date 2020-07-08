@@ -86,16 +86,5 @@ namespace reddit_clone_api.Controllers
         Posts = posts
       });
     }
-
-    /// <summary>
-    /// TODO: Write docs
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet]
-    public IActionResult GetAll()
-    {
-      var users = _userService.GetAll();
-      return Ok(users);
-    }
   }
 }
