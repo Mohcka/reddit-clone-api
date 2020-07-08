@@ -48,12 +48,12 @@ namespace redit_clone_api.Controllers
       // TODO: add some validation
       ModelState.Remove("Id"); // Id will be created for post
       ModelState.Remove("UserId"); // Id will be created for post
-      var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value; // User who created this post
+      var userId = User.FindFirst(ClaimTypes.Name)?.Value; // User who created this post
 
       _postService.Create(new Post{
         PostTitle = post.PostTitle,
         PostContent = post.PostContent,
-        UserId = post.UserId
+        UserId = userId
       });
 
       return Ok();
