@@ -42,7 +42,7 @@ namespace reddit_clone_api.Controllers
       // No user found from service
       if (resp == null) return BadRequest(new { message = "Username or password was incorrect" });
 
-      // Checksout, return token to client
+      // Checksout, send AuthenticateResponseDTO
       return Ok(resp);
     }
 
