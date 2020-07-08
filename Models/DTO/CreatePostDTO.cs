@@ -8,7 +8,5 @@ namespace reddit_clone_api.Models.DTO {
     public string PostTitle { get; set; }
     [Required]
     public string PostContent { get; set; }
-    [Required]
-    public string UserId { get; set; }
   }
 }
