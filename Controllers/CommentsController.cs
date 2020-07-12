@@ -80,7 +80,7 @@ namespace reddit_clone_api.Controllers
 
     [HttpPost("{id:length(24)}/vote")]
     [Authorize]
-    public async Task<IActionResult> UpvoteComment(string id, [Required]string voteType) {
+    public async Task<IActionResult> VoteOnComment(string id, [Required] string voteType)
       var userId = User.FindFirst(ClaimTypes.Name)?.Value;
       // Check if the request sent a valid vote
       if(!Enum.IsDefined(typeof(VoteType), voteType)) {
