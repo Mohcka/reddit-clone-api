@@ -10,7 +10,7 @@ namespace reddit_clone_api.Services
   public interface ICommentService : IBaseServiceMDB<Comment>
   {
     Task<List<Comment>> GetCommentsByPostId(string Id);
-    Task<Comment> VoteOnComment(Comment comment1, VoteType vote);
+    Task<Comment> VoteOnComment(Comment comment, VoteType vote);
   }
 
   public class CommentService : BaseServiceMDB<Comment>, ICommentService
