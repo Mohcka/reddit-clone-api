@@ -33,7 +33,7 @@ namespace reddit_clone_api.Controllers
     /// </summary>
     /// <param name="postId">Id of the post</param>
     /// <returns></returns>
-    [HttpGet("/:postId")]
+    [HttpGet("/{postId:length(24)}")]
     public async Task<IActionResult> getAllPostComments(string postId)
     {
       List<Comment> comments;
