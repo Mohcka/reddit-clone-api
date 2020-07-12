@@ -10,7 +10,7 @@ namespace reddit_clone_api.Models
   /// <summary>
   /// TODO: Write docs
   /// </summary>
-  public class User
+  public class User : IMDBDocument
   {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
