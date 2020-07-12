@@ -8,7 +8,7 @@ namespace reddit_clone_api.Models
   /// <summary>
   /// TODO: Write docs
   /// </summary>
-  public class Post
+  public class Post : IMDBDocument
   {
     [BsonId]
     [Required]
@@ -24,6 +24,8 @@ namespace reddit_clone_api.Models
 
     [Required]
     public string UserId { get; set; }
+    [Required]
+    public int NumVotes { get; set; } = 0;
 
   }
 }

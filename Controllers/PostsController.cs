@@ -1,11 +1,15 @@
+using System;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
-using reddit_clone_api.Models;
-using reddit_clone_api.Models.DTO;
-using reddit_clone_api.Services;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
-using System.Collections.Generic;
+using reddit_clone_api.Models;
+using reddit_clone_api.Models.DTO;
+using reddit_clone_api.Services;
 
 namespace redit_clone_api.Controllers
 {
@@ -15,11 +19,15 @@ namespace redit_clone_api.Controllers
   public class PostsController : ControllerBase
   {
     private readonly IPostService _postService;
+    private readonly ICommentService _commentService;
+    private readonly IVoteService _voteService;
 
 
-    public PostsController(IPostService postService)
+    public PostsController(IPostService postService, ICommentService commentService, IVoteService voteService)
     {
       _postService = postService;
+      _commentService = commentService;
+      _voteService = voteService;
     }
 
     [HttpGet]
@@ -27,7 +35,6 @@ namespace redit_clone_api.Controllers
     public ActionResult<List<Post>> Get() => _postService.Get();
 
     [HttpGet("{id:length(24)}")]
-    [Authorize]
     public ActionResult<Post> Get(string id){
       //TODO: validate user exists
       if(id.Length != 24) return BadRequest(new { message = "Invalid id"});
@@ -45,9 +52,6 @@ namespace redit_clone_api.Controllers
     [Authorize]
     public IActionResult Create([FromBody]CreatePostDTO post)
     {
-      // TODO: add some validation
-      ModelState.Remove("Id"); // Id will be created for post
-      ModelState.Remove("UserId"); // Id will be created for post
       var userId = User.FindFirst(ClaimTypes.Name)?.Value; // User who created this post
 
       _postService.Create(new Post{
@@ -74,6 +78,50 @@ namespace redit_clone_api.Controllers
       } 
 
       _postService.Update(post.Id, postIn);
+
+      return Ok();
+    }
+
+    [HttpGet("/{id:length(24)}/comment")]
+    public async Task<IActionResult> GetWithComments(string id){
+      List<Comment> comments;
+
+      var post = _postService.Get(id);
+
+      if (post == null)
+      {
+        return NotFound(new { message = "Post wasn't found" });
+      }
+      
+      comments = await _commentService.GetCommentsByPostId(id);
+
+      return Ok(comments);
+    }
+
+    [HttpPost("{id:length(24)}/vote")]
+    [Authorize]
+    public async Task<IActionResult> VoteOnPost(string id, [Required]string voteType) {
+      var userId = User.FindFirst(ClaimTypes.Name)?.Value;
+      // Check if the request sent a valid vote
+      if(!Enum.IsDefined(typeof(VoteType), voteType)) {
+        return BadRequest( new { message = "Invalid vote"});
+      }
+      // Create var with enum value
+      Enum.TryParse(voteType, out VoteType vote);
+
+      var post = _postService.Get(id);
+
+      if(post == null) {
+        return NotFound( new { message = "Post was not found"});
+      }
+      // Update vote num for post
+      _postService.VoteOnPost(post, vote);
+      // Add vote record
+      await  _voteService.Add(new Vote {
+        UserVote = vote,
+        UserId = userId,
+        ResponseId = post.Id
+      });
 
       return Ok();
     }

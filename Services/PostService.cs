@@ -18,7 +18,7 @@ namespace reddit_clone_api.Services
     Post Create(Post post);
     void Update(string id, Post postin);
     void Remove(string id);
-
+    Post VoteOnPost(Post post, VoteType vote);
   }
 
   public class PostService : IPostService
@@ -58,5 +58,17 @@ namespace reddit_clone_api.Services
 
     public void Remove(string id) =>
         _posts.DeleteOne(post => post.Id == id);
+
+    public Post VoteOnPost(Post post, VoteType vote) {
+      if(vote == VoteType.Up){
+        post.NumVotes++;
+      } else {
+        post.NumVotes--;
+      }
+
+      Update(post.Id, post);
+
+      return post;
+    }
   }
 }
