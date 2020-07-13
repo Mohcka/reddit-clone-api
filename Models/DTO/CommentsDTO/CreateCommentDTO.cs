@@ -5,7 +5,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace reddit_clone_api.Models.DTO
 {
-  public class CreateCommentDTO
+  public class CreateCommentRequestDTO
   {
     [Required]
     public string UserComment { get; set; }
