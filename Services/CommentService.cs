@@ -10,7 +10,7 @@ namespace reddit_clone_api.Services
   public interface ICommentService : IBaseServiceMDB<Comment>
   {
     Task<List<Comment>> GetCommentsByPostId(string Id);
-    Task<Comment> VoteOnComment(Comment comment, VoteType vote);
+    Task<Comment> VoteOnComment(Comment comment, VoteType vote, int offset = 1);
   }
 
   public class CommentService : BaseServiceMDB<Comment>, ICommentService
@@ -21,14 +21,21 @@ namespace reddit_clone_api.Services
     }
 
     public async Task<List<Comment>> GetCommentsByPostId(string postId) {
-      return await _db.Find<Comment>(c => c.Id == postId).ToListAsync();
+      return await _db.Find<Comment>(c => c.PostId == postId).ToListAsync();
     }
 
-    public async Task<Comment> VoteOnComment(Comment comment, VoteType vote) {
+    /// <summary>
+    /// Updates the comment numVotes by the vote type and the specified offset
+    /// </summary>
+    /// <param name="comment">The comment being voted on</param>
+    /// <param name="vote">Enum to determin if the vote is a voteup or a votedown</param>
+    /// <param name="offset">The amount to alter the number of votes by</param>
+    /// <returns></returns>
+    public async Task<Comment> VoteOnComment(Comment comment, VoteType vote, int offset = 1) {
       if(vote == VoteType.Up){
-        comment.NumVotes++;
+        comment.NumVotes += offset;
       } else {
-        comment.NumVotes--;
+        comment.NumVotes -= offset;
       }
 
       await Update(comment);
