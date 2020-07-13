@@ -37,29 +37,35 @@ namespace redit_clone_api.Controllers
     public ActionResult<List<Post>> Get() => _postService.Get();
 
     [HttpGet("{id:length(24)}")]
-    public ActionResult<Post> Get(string id){
+    public ActionResult<Post> Get(string id)
+    {
       //TODO: validate user exists
-      if(id.Length != 24) return BadRequest(new { message = "Invalid id"});
+      if (id.Length != 24) return BadRequest(new { message = "Invalid id" });
 
-      var user =_postService.Get(id);
+      var user = _postService.Get(id);
 
       
 
-      if(user == null) return BadRequest(new {message = "User does not exist"});
+      if (user == null) return BadRequest(new { message = "User does not exist" });
 
       return Ok(user);
     }
 
     [HttpPost]
     [Authorize]
-    public IActionResult Create([FromBody]CreatePostDTO post)
+    public async Task<IActionResult> Create([FromBody] CreatePostDTO post)
     {
       var userId = User.FindFirst(ClaimTypes.Name)?.Value; // User who created this post
 
-      _postService.Create(new Post{
+      var user = await _userService.GetUser(userId);
+
+
+      _postService.Create(new Post
+      {
         PostTitle = post.PostTitle,
         PostContent = post.PostContent,
-        UserId = userId
+        UserId = userId,
+        UserName = user.UserName
       });
 
       return Ok();
@@ -72,11 +78,13 @@ namespace redit_clone_api.Controllers
     /// <returns>Action Result with status of update</returns>
     [HttpPut]
     [Authorize]
-    public IActionResult Update([FromBody] Post postIn) {
+    public IActionResult Update([FromBody] Post postIn)
+    {
       var post = _postService.Get(postIn.Id);
 
-      if(post == null) {
-        return NotFound(new { message = "Post to update was not found"});
+      if (post == null)
+      {
+        return NotFound(new { message = "Post to update was not found" });
       } 
 
       _postService.Update(post.Id, postIn);
@@ -84,8 +92,9 @@ namespace redit_clone_api.Controllers
       return Ok();
     }
 
-    [HttpGet("/{id:length(24)}/comment")]
-    public async Task<IActionResult> GetWithComments(string id){
+    [HttpGet("{id:length(24)}/comments")]
+    public async Task<IActionResult> GetWithComments(string id)
+    {
       List<Comment> comments;
 
       var post = _postService.Get(id);
@@ -97,7 +106,11 @@ namespace redit_clone_api.Controllers
       
       comments = await _commentService.GetCommentsByPostId(id);
 
-      return Ok(comments);
+      return Ok(new PostWithCommentsResponseDTO
+      {
+        Post = post,
+        Comments = comments
+      });
     }
 
     [HttpPost("{id:length(24)}/vote")]

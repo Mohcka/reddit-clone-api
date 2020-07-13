@@ -54,13 +54,18 @@ namespace reddit_clone_api.Controllers
 
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> Create([FromBody]CreateCommentDTO comment) {
+    public async Task<IActionResult> Create([FromBody] CreateCommentRequestDTO comment)
+    {
       var userId = User.FindFirst(ClaimTypes.Name)?.Value;
 
-      await _commentService.Add(new Comment{
+      var user = await _userService.GetUser(userId);
+
+      await _commentService.Add(new Comment
+      {
         UserComment = comment.UserComment,
+        PostId = comment.PostId,
         UserId = userId,
-        PostId = comment.PostId
+        Username = user.UserName
       });
 
       return Ok();
@@ -68,11 +73,13 @@ namespace reddit_clone_api.Controllers
 
     [HttpPut]
     [Authorize]
-    public async Task<IActionResult> Update([FromBody] Comment commentIn) {
+    public async Task<IActionResult> Update([FromBody] Comment commentIn)
+    {
       var comment = _commentService.Get(commentIn.Id);
 
-      if(comment == null){
-        return NotFound(new { message = "Comment was not found"});
+      if (comment == null)
+      {
+        return NotFound(new { message = "Comment was not found" });
       }
 
       await _commentService.Update(commentIn);
