@@ -21,13 +21,15 @@ namespace redit_clone_api.Controllers
     private readonly IPostService _postService;
     private readonly ICommentService _commentService;
     private readonly IVoteService _voteService;
+    private readonly IUserService _userService;
 
 
-    public PostsController(IPostService postService, ICommentService commentService, IVoteService voteService)
+    public PostsController(IPostService postService, ICommentService commentService, IVoteService voteService, IUserService userService)
     {
       _postService = postService;
       _commentService = commentService;
       _voteService = voteService;
+      _userService = userService;
     }
 
     [HttpGet]

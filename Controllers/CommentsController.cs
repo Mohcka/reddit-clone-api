@@ -20,12 +20,14 @@ namespace reddit_clone_api.Controllers
     private readonly ICommentService _commentService;
     private readonly IPostService _postService;
     private readonly IVoteService _voteService;
+    private readonly IUserService _userService;
 
-    public CommentsController(ICommentService commentService, IPostService postService, IVoteService voteService)
+    public CommentsController(ICommentService commentService, IPostService postService, IVoteService voteService, IUserService userService)
     {
       _commentService = commentService;
       _postService = postService;
       _voteService = voteService;
+      _userService = userService;
     }
 
     /// <summary>
