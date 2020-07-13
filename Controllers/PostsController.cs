@@ -44,7 +44,7 @@ namespace redit_clone_api.Controllers
 
       var user = _postService.Get(id);
 
-      
+
 
       if (user == null) return BadRequest(new { message = "User does not exist" });
 
@@ -85,7 +85,7 @@ namespace redit_clone_api.Controllers
       if (post == null)
       {
         return NotFound(new { message = "Post to update was not found" });
-      } 
+      }
 
       _postService.Update(post.Id, postIn);
 
@@ -103,7 +103,7 @@ namespace redit_clone_api.Controllers
       {
         return NotFound(new { message = "Post wasn't found" });
       }
-      
+
       comments = await _commentService.GetCommentsByPostId(id);
 
       return Ok(new PostWithCommentsResponseDTO
@@ -115,30 +115,38 @@ namespace redit_clone_api.Controllers
 
     [HttpPost("{id:length(24)}/vote")]
     [Authorize]
-    public async Task<IActionResult> VoteOnPost(string id, [Required]string voteType) {
+    public async Task<IActionResult> VoteOnPost(string id, [Required] string voteType)
+    {
       var userId = User.FindFirst(ClaimTypes.Name)?.Value;
       // Check if the request sent a valid vote
-      if(!Enum.IsDefined(typeof(VoteType), voteType)) {
-        return BadRequest( new { message = "Invalid vote"});
+      if (!Enum.IsDefined(typeof(VoteType), voteType))
+      {
+        return BadRequest(new { message = "Invalid vote" });
       }
       // Create var with enum value
       Enum.TryParse(voteType, out VoteType vote);
 
       var post = _postService.Get(id);
 
-      if(post == null) {
-        return NotFound( new { message = "Post was not found"});
+      if (post == null)
+      {
+        return NotFound(new { message = "Post was not found" });
       }
       // Update vote num for post
       _postService.VoteOnPost(post, vote);
       // Add vote record
-      await  _voteService.Add(new Vote {
+      await _voteService.Add(new Vote
+      {
         UserVote = vote,
         UserId = userId,
         ResponseId = post.Id
       });
 
-      return Ok();
+      return Ok(new VoteResponseDTO
+      {
+        UserVote = Enum.GetName(typeof(VoteType), vote),
+        NumVotes = post.NumVotes
+      });
     }
   }
 }

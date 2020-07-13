@@ -46,7 +46,7 @@ namespace reddit_clone_api.Controllers
       {
         return NotFound(new { message = "Post wasn't found" });
       }
-      
+
       comments = await _commentService.GetCommentsByPostId(postId);
 
       return Ok(comments);
@@ -90,23 +90,65 @@ namespace reddit_clone_api.Controllers
     [HttpPost("{id:length(24)}/vote")]
     [Authorize]
     public async Task<IActionResult> VoteOnComment(string id, [Required] string voteType)
+    {
       var userId = User.FindFirst(ClaimTypes.Name)?.Value;
       // Check if the request sent a valid vote
-      if(!Enum.IsDefined(typeof(VoteType), voteType)) {
-        return BadRequest( new { message = "Invalid vote"});
+      if (!Enum.IsDefined(typeof(VoteType), voteType))
+      {
+        return BadRequest(new { message = "Invalid vote" });
       }
       // Create var with enum value
 
       Enum.TryParse(voteType, out VoteType vote);
       var comment = await _commentService.Get(id);
 
-      if(comment == null) {
+      if (comment == null)
+      {
         return NotFound(new { message = "Post was not found" });
       }
 
-      await _commentService.VoteOnComment(comment, vote);
+      // Used to determine if a vote should be cancelled or reversed if it exists
+      var foundVote = await _voteService.FindByUserAndResponseId(userId, comment.Id);
 
-      return Ok();
+      if (foundVote == null)
+      {
+        // No vote has been registered, so create one and add to tally
+        comment = await _commentService.VoteOnComment(comment, vote);
+        await _voteService.Add(new Vote
+        {
+          UserVote = vote,
+          UserId = userId,
+          ResponseId = comment.Id
+        });
+      }
+      else if (foundVote.UserVote == vote)
+      {
+        // Clear vote if same vote was selected
+
+        // Set to opposite vote to negate user's vote
+        var negatingVote = vote == VoteType.Up ? VoteType.Down : VoteType.Up;
+
+        comment = await _commentService.VoteOnComment(comment, negatingVote);
+        await _voteService.Remove(foundVote.Id);
+      }
+      else
+      {
+        // Can be implied at this point that the user changed their vote
+        // to the opposite
+
+        // Since they chose the opposite vote, offset is set to two
+        comment = await _commentService.VoteOnComment(comment, vote, 2);
+
+        // Set vote document to the opposite vote
+        foundVote.UserVote = vote;
+        await _voteService.Update(foundVote);
+      }
+
+      return Ok(new VoteResponseDTO
+      {
+        UserVote = Enum.GetName(typeof(VoteType), vote),
+        NumVotes = comment.NumVotes
+      });
     }
   }
 }
