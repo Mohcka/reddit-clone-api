@@ -25,6 +25,8 @@ namespace reddit_clone_api.Models
     [Required]
     public string UserId { get; set; }
     [Required]
+    public string UserName { get; set; }
+    [Required]
     public int NumVotes { get; set; } = 0;
 
   }
