@@ -104,7 +104,7 @@ namespace reddit_clone_api.Controllers
 
       if (comment == null)
       {
-        return NotFound(new { message = "Post was not found" });
+        return NotFound(new { message = "Comment was not found" });
       }
 
       // Used to determine if a vote should be cancelled or reversed if it exists
