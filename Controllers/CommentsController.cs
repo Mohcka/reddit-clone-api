@@ -30,27 +30,19 @@ namespace reddit_clone_api.Controllers
       _userService = userService;
     }
 
-    /// <summary>
-    /// Fetches all comments for a post based on it's Id
-    /// </summary>
-    /// <param name="postId">Id of the post</param>
-    /// <returns></returns>
-    [HttpGet("/{postId:length(24)}")]
-    public async Task<IActionResult> getAllPostComments(string postId)
+    [HttpGet("{id:length(24)}")]
+    public async Task<IActionResult> Get(string id)
     {
-      List<Comment> comments;
+      var comment = await _commentService.Get(id);
 
-      var post = _postService.Get(postId);
-
-      if (post == null)
+      if (comment == null)
       {
-        return NotFound(new { message = "Post wasn't found" });
+        return NotFound(new { message = "Comment was not found" });
       }
 
-      comments = await _commentService.GetCommentsByPostId(postId);
-
-      return Ok(comments);
+      return Ok(comment);
     }
+
 
     [HttpPost]
     [Authorize]
