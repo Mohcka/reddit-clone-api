@@ -1,3 +1,4 @@
+using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -21,11 +22,15 @@ namespace reddit_clone_api.Controllers
   {
     private IUserService _userService;
     private IPostService _postService;
+    private IVoteService _voteService;
+    private ICommentService _commentService;
 
-    public UsersController(IUserService userService, IPostService postService)
+    public UsersController(IUserService userService, IPostService postService, ICommentService commentService, IVoteService voteService)
     {
       _userService = userService;
       _postService = postService;
+      _voteService = voteService;
+      _commentService = commentService;
     }
 
     /// <summary>
@@ -85,6 +90,52 @@ namespace reddit_clone_api.Controllers
       {
         Username = user.UserName,
         Posts = posts
+      });
+    }
+
+    [HttpGet("{id:length(24)}/posts/{postId:length(24)}/votes")]
+    public async Task<IActionResult> GetUsersVoteFromPost(string id, string postId) {
+      var userId = User.FindFirst(ClaimTypes.Name)?.Value;
+
+      var post = _postService.Get(postId);
+
+      if(post == null) {
+        return NotFound( new { message = "Post was not found"});
+      }
+
+      var vote = await _voteService.FindByUserAndResponseId(userId, postId);
+
+      if(vote == null) {
+        // Return null for frontend to handle
+        return Ok(null);
+      }
+
+      return Ok(new VoteResponseDTO{
+        UserVote = Enum.GetName(typeof(VoteType), vote.UserVote),
+        NumVotes = post.NumVotes
+      });
+    }
+
+    [HttpGet("{id:length(24)}/comments/{commentId:length(24)}/votes")]
+    public async Task<IActionResult> GetUsersVoteFromComment(string id, string commentId) {
+      var userId = User.FindFirst(ClaimTypes.Name)?.Value;
+
+      var comment = await _commentService.Get(commentId);
+
+      if(comment == null) {
+        return NotFound( new { message = "Comment was not found"});
+      }
+
+      var vote = await _voteService.FindByUserAndResponseId(userId, commentId);
+
+      if(vote == null) {
+        // Return null for frontend to handle
+        return Ok(null);
+      }
+
+      return Ok(new VoteResponseDTO{
+        UserVote = Enum.GetName(typeof(VoteType), vote.UserVote),
+        NumVotes = comment.NumVotes
       });
     }
   }
