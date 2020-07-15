@@ -18,7 +18,7 @@ namespace reddit_clone_api.Services
     Post Create(Post post);
     void Update(string id, Post postin);
     void Remove(string id);
-    Post VoteOnPost(Post post, VoteType vote);
+    Post VoteOnPost(Post post, VoteType vote, int offset = 1);
   }
 
   public class PostService : IPostService
@@ -59,11 +59,18 @@ namespace reddit_clone_api.Services
     public void Remove(string id) =>
         _posts.DeleteOne(post => post.Id == id);
 
-    public Post VoteOnPost(Post post, VoteType vote) {
+    /// <summary>
+    /// Updates the post numVotes by the vote type and the specified offset
+    /// </summary>
+    /// <param name="post">The post being voted on</param>
+    /// <param name="vote">Enum to determin if the vote is a voteup or a votedown</param>
+    /// <param name="offset">The amount to alter the number of votes by</param>
+    /// <returns></returns>
+    public Post VoteOnPost(Post post, VoteType vote, int offset = 1) {
       if(vote == VoteType.Up){
-        post.NumVotes++;
+        post.NumVotes += offset;
       } else {
-        post.NumVotes--;
+        post.NumVotes -= offset;
       }
 
       Update(post.Id, post);
