@@ -132,15 +132,43 @@ namespace redit_clone_api.Controllers
       {
         return NotFound(new { message = "Post was not found" });
       }
-      // Update vote num for post
-      _postService.VoteOnPost(post, vote);
-      // Add vote record
-      await _voteService.Add(new Vote
+
+      // Used to determine if a vote should be cancelled or reversed if it exists
+      var foundVote = await _voteService.FindByUserAndResponseId(userId, post.Id);
+
+      if (foundVote == null)
       {
-        UserVote = vote,
-        UserId = userId,
-        ResponseId = post.Id
-      });
+        // No vote has been registered, so create one and add to tally
+        post = _postService.VoteOnPost(post, vote);
+        await _voteService.Add(new Vote
+        {
+          UserVote = vote,
+          UserId = userId,
+          ResponseId = post.Id
+        });
+      }
+      else if (foundVote.UserVote == vote)
+      {
+        // Clear vote if same vote was selected
+
+        // Set to opposite vote to negate user's vote
+        var negatingVote = vote == VoteType.Up ? VoteType.Down : VoteType.Up;
+
+        post = _postService.VoteOnPost(post, negatingVote);
+        await _voteService.Remove(foundVote.Id);
+      }
+      else
+      {
+        // Can be implied at this point that the user changed their vote
+        // to the opposite
+
+        // Since they chose the opposite vote, offset is set to two
+        post = _postService.VoteOnPost(post, vote, 2);
+
+        // Set vote document to the opposite vote
+        foundVote.UserVote = vote;
+        await _voteService.Update(foundVote);
+      }
 
       return Ok(new VoteResponseDTO
       {
